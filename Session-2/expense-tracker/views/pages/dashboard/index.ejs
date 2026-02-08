@@ -1,0 +1,50 @@
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5">Welcome back, <%= user.name %>!</h1>
+            <p class="text-muted">Here is an overview of your current accounts.</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">Your Accounts</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Account Name</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th class="text-end">Balance/Usage</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% accounts.forEach(account => { %>
+                            <tr>
+                                <td><strong><%= account.accountName %></strong></td>
+                                <td><%= account.accountType %></td>
+                                <td class="flex flex-row justify-center items-center">
+                                    <% if (account.isDeleted == false) { %>    
+                                        <p class="text-success"><i class="fa-solid fa-circle"></i>active</p>
+                                    <% } else { %>
+                                        <p class="text-danger"><i class="fa-solid fa-circle"></i>inactive</p>
+                                    <% } %>
+                                </td>
+                                <td class="text-end font-monospace"><%= account.balance %></td>
+                                <td>
+                                    <a href="/account/edit/<%= account.id %>" class="btn btn-sm btn-primary">Edit</a>
+                                    <a href="/account/delete/<%= account.id %>" class="btn btn-sm btn-danger">Delete</a>
+                                </td>
+                            </tr>   
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
