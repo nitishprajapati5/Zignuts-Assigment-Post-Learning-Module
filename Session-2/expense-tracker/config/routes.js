@@ -23,7 +23,15 @@ module.exports.routes = {
   'POST /': { action: 'auth/login' },
   'GET /register': {action:'auth/render-register'},
   'POST /register':{action:'auth/register'},
-  'GET /dashboard':{action:'dashboard/get-all-accounts'},
+  'GET /dashboard':{action:'dashboard/get-all-accounts'}, 
+  'GET /account/create':{action:'dashboard/create-account'},
+  'POST /account/create':{action:'dashboard/create-account-post'},
+  'GET /account/edit/:id':{action:'dashboard/edit-account'},
+  'POST /account/edit/:id':{action:'dashboard/edit-account-post'},
+  'GET /account/delete/:id':{action:'dashboard/delete-account'},
+  'GET /account/activate/:id':{action:'dashboard/activate-account'},
+  'GET /friends':{action:'friend/get-all-friends'},
+  'GET /friends/add':{action:'friend/add-friends'},
 
 
 

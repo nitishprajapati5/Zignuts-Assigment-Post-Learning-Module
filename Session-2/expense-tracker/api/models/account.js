@@ -17,7 +17,7 @@ module.exports = {
     accountType: {
       type: 'string',
       required: true,
-      isIn: ['cash', 'bank', 'credit_card', 'debit_card', 'wallet', 'other']
+      isIn: ['cash', 'bank', 'credit_card', 'debit_card', 'wallet', 'other','savings','checking']
     },
     status: {
       type: 'string',

@@ -25,6 +25,15 @@ module.exports = {
     accounts: {
       collection: 'account',
       via: 'user'
+    },
+   friends: {
+      collection: 'user',
+      via: 'isFriendOf'
+    },
+
+    isFriendOf: {
+      collection: 'user',
+      via: 'friends'
     }
   },
 };

@@ -1,0 +1,43 @@
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5">Update Account</h1>
+            <p class="text-muted">Update your account</p>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">   
+            <form action="/account/edit/<%= account.id %>" method="POST">
+                <div class="mb-3">
+                    <label for="accountName" class="form-label">Account Name</label>
+                    <input type="text" class="form-control" id="accountName" name="accountName" value="<%= account.accountName %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="accountType" class="form-label">Account Type</label>
+                    <select name="accountType" id="accountType" class="form-control" value="<%= account.accountType %>" required>
+                        <option value="">Select Account Type</option>
+                        <option value="savings" <%= account.accountType === 'savings' ? 'selected' : '' %>>Savings</option>
+                        <option value="checking" <%= account.accountType === 'checking' ? 'selected' : '' %>>Checking</option>
+                        <option value="credit_card" <%= account.accountType === 'credit_card' ? 'selected' : '' %>>Credit Card</option>        
+                        <option value="debit_card" <%= account.accountType === 'debit_card' ? 'selected' : '' %>>Debit Card</option>
+                        <option value="cash" <%= account.accountType === 'cash' ? 'selected' : '' %>>Cash</option>
+                        <option value="bank" <%= account.accountType === 'bank' ? 'selected' : '' %>>Bank</option>
+                        <option value="wallet" <%= account.accountType === 'wallet' ? 'selected' : '' %>>Wallet</option>
+                        <option value="other" <%= account.accountType === 'other' ? 'selected' : '' %>>Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="balance" class="form-label">Add Balance</label>
+                    <input type="number" class="form-control" id="balance" name="balance" value="<%= account.balance %>" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Account</button>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,44 @@
+
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5">Create Account</h1>
+            <p class="text-muted">Create a new account</p>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <form action="/account/create" method="POST">
+                <div class="mb-3">
+                    <label for="accountName" class="form-label">Account Name</label>
+                    <input type="text" class="form-control" id="accountName" name="accountName" required>
+                </div>
+                <div class="mb-3">
+                    <label for="accountType" class="form-label">Account Type</label>
+                    <select name="accountType" id="accountType" class="form-control" required>
+                        <option value="">Select Account Type</option>
+                        <option value="savings">Savings</option>
+                        <option value="checking">Checking</option>
+                        <option value="credit_card">Credit Card</option>
+                        <option value="debit_card">Debit Card</option>
+                        <option value="cash">Cash</option>
+                        <option value="bank">Bank</option>
+                        <option value="wallet">Wallet</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="balance" class="form-label">Add Balance</label>
+                    <input type="number" class="form-control" id="balance" name="balance" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+        </div>
+    </div>
+</div>

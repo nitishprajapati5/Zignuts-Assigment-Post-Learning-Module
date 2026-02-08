@@ -1,0 +1,60 @@
+<div class="container py-5">
+
+
+    <!-- Friends List -->
+    <% if (friends.length == 0) { %>
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">Your Friends</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="3" class="text-center">No friends found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    <% } else { %>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">Your Friends</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       <% friends.forEach(friend => { %>
+                            <tr>
+                                <td><strong><%= friend.name %></strong></td>
+                                <td><%= friend.email %></td>
+                                <td>
+                                    <a href="/friends/add/<%= friend.id %>" class="btn btn-sm btn-primary">Add Friend</a>
+                                </td>
+                            </tr>   
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <% } %>
