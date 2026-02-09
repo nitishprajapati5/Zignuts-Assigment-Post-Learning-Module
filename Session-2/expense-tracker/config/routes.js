@@ -30,10 +30,13 @@ module.exports.routes = {
   'POST /account/edit/:id':{action:'dashboard/edit-account-post'},
   'GET /account/delete/:id':{action:'dashboard/delete-account'},
   'GET /account/activate/:id':{action:'dashboard/activate-account'},
+  'GET /account/set-default/:id':{action:'dashboard/set-default-account'},
+
   'GET /friends':{action:'friend/get-all-friends'},
   'GET /friends/add/:id':{action:'friend/add-friends'},
   'GET /friends/my-friends':{action:'friend/get-my-friends'},
-  'GET /friends/remove/:id':{action:'friend/remove-friends'}
+  'GET /friends/remove/:id':{action:'friend/remove-friends'},
+  
 
 
 

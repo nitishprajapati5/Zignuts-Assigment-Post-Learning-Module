@@ -19,6 +19,10 @@ module.exports = {
       required: true,
       isIn: ['cash', 'bank', 'credit_card', 'debit_card', 'wallet', 'other','savings','checking']
     },
+    isDefault: {
+      type: 'boolean',
+      defaultsTo: false
+    },
     status: {
       type: 'string',
       required: true,

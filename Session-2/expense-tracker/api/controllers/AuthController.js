@@ -46,7 +46,8 @@ module.exports = {
       user:user.id,
       accountType:'cash',
       balance:0,
-      status:'active'
+      status:'active',
+      isDefault:true
     });
 
     console.log(user.id);

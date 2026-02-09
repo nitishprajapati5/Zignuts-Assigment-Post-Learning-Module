@@ -47,6 +47,8 @@ module.exports = {
         return res.redirect('/');
       }   
       const {id} = req.params;
+
+
       const account = await sails.models.account.findOne({where:{id}});
       res.view("pages/dashboard/edit", { layout: "layouts/layout", account,user });
     } catch (error) {
@@ -61,8 +63,8 @@ module.exports = {
         return res.redirect('/');
       }   
       const {id} = req.params;
-      const {accountName,accountType,balance} = req.allParams();
-      const account = await sails.models.account.update({id},{accountName,accountType,balance});
+      const {accountName,accountType,balance,isDefaultAccount} = req.allParams();
+      const account = await sails.models.account.update({id},{accountName,accountType,balance,isDefault:isDefaultAccount});
       //req.flash('success','Account Updated Successfully');
       return res.redirect('/dashboard');
     } catch (error) {
@@ -93,11 +95,30 @@ module.exports = {
       }   
       const {id} = req.params;
       const account = await sails.models.account.update({id},{isDeleted:false,status:'active'});
-      //req.flash('success','Account Activated Successfully');
       return res.redirect('/dashboard');
     } catch (error) {
       console.log(error);
       return res.serverError(error);  
     }
-  },  
+  }, 
+  'set-default-account':async (req,res) => {
+    try {
+      const user = req.session.user;  
+      if(!user){
+        return res.redirect('/');
+      }   
+      const {id} = req.params;
+
+      const existingDefaultAccount = await sails.models.account.findOne({where:{user:user.id,isDefault:true}});
+      if(existingDefaultAccount){
+        await sails.models.account.update({id:existingDefaultAccount.id},{isDefault:false});
+      }
+
+      const account = await sails.models.account.update({id},{isDefault:true});
+      return res.redirect('/dashboard');
+    } catch (error) {
+      console.log(error);
+      return res.serverError(error);  
+    }
+  }, 
 };

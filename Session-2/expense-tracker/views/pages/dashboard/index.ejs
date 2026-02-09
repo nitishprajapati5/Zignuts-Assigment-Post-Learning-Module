@@ -58,17 +58,18 @@
                     <thead class="table-light">
                         <tr>
                             <th>Account Name</th>
-                            <th>Type</th>
+                          
                             <th>Status</th>
                             <th class="text-end">Balance/Usage</th>
                             <th>Action</th>
+                            <th>Set as Default</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% accounts.forEach(account => { %>
-                            <tr>
-                                <td><strong><%= account.accountName %></strong></td>
-                                <td><%= account.accountType %></td>
+                            <tr class="<% if (account.isDefault) { %>table-info<% } %>">
+                                <td><strong><%= account.accountName %> <%= account.isDefault ? '(Default)' : '' %></strong></td>
+                               
                                 <td class="flex flex-row justify-center items-center">
                                     <% if (account.isDeleted == false) { %>    
                                         <p class="text-success"><i class="fa-solid fa-circle"></i>active</p>
@@ -80,6 +81,13 @@
                                 <td>
                                     <a href="/account/edit/<%= account.id %>" class="btn btn-sm btn-primary">Edit</a>
                                     <a href="/account/delete/<%= account.id %>" class="btn btn-sm btn-danger">Deactivate</a>
+                                </td>
+                                <td>
+                                    <% if (account.isDefault) { %>
+                                        <span class="text-success">✓ Default</span>
+                                    <% } else { %>
+                                        <a href="/account/set-default/<%= account.id %>" class="btn btn-sm btn-outline-primary">Set as Default</a>
+                                    <% } %>
                                 </td>
                             </tr>   
                         <% }); %>
