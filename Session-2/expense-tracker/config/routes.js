@@ -31,7 +31,9 @@ module.exports.routes = {
   'GET /account/delete/:id':{action:'dashboard/delete-account'},
   'GET /account/activate/:id':{action:'dashboard/activate-account'},
   'GET /friends':{action:'friend/get-all-friends'},
-  'GET /friends/add':{action:'friend/add-friends'},
+  'GET /friends/add/:id':{action:'friend/add-friends'},
+  'GET /friends/my-friends':{action:'friend/get-my-friends'},
+  'GET /friends/remove/:id':{action:'friend/remove-friends'}
 
 
 

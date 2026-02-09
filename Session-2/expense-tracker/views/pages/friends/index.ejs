@@ -1,60 +1,89 @@
-<div class="container py-5">
+<% var search=typeof search !=='undefined' ? search : '' ; %>
 
+    <div class="container py-5">
 
-    <!-- Friends List -->
-    <% if (friends.length == 0) { %>
-        <div class="card shadow-sm mt-4">
-            <div class="card-header bg-white py-3">
-                <h5 class="mb-0">Your Friends</h5>
+        <div class="row d-flex justify-content-between mb-4">
+            <div class="col">
+                <a href="/dashboard" class="btn btn-primary">Back</a>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0 align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="3" class="text-center">No friends found</td>
-                            </tr>
-                        </tbody>
-                    </table>
+        </div>
+
+        <form action="/friends" method="GET">
+            <input type="text" placeholder="Search by name or email" class="form-control" id="search" name="search"
+                value="<%- search %>">
+            <br>
+            <button class="btn btn-primary" type="submit">Search</button>
+            <a href="/friends?search=all" class="btn btn-primary">Reset</a>
+        </form>
+
+        <!-- Friends List -->
+        <% if (friends.length==0) { %>
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Your Friends</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="3" class="text-center">No friends found</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
-    <% } else { %>
+            <% } else { %>
 
-    <div class="card shadow-sm mt-4">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0">Your Friends</h5>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                       <% friends.forEach(friend => { %>
-                            <tr>
-                                <td><strong><%= friend.name %></strong></td>
-                                <td><%= friend.email %></td>
-                                <td>
-                                    <a href="/friends/add/<%= friend.id %>" class="btn btn-sm btn-primary">Add Friend</a>
-                                </td>
-                            </tr>   
-                        <% }); %>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">Your Friends</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0 align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% friends.forEach(friend=> { %>
+                                        <tr>
+                                            <td><strong>
+                                                    <%= friend.name %>
+                                                </strong></td>
+                                            <td>
+                                                <%= friend.email %>
+                                            </td>
+                                            <td>
+                                                <% if (myFriendIds.includes(friend.id)) { %>
+                                                    <button class="btn btn-sm btn-success" disabled>
+                                                        <i class="bi bi-check"></i> Friends
+                                                    </button>
+                                                    <% } else { %>
+                                                        <a href="/friends/add/<%= friend.id %>"
+                                                            class="btn btn-sm btn-primary">
+                                                            Add Friend
+                                                        </a>
+                                                        <% } %>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
     </div>
-    <% } %>
