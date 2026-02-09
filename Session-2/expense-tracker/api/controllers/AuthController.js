@@ -58,5 +58,12 @@ module.exports = {
       sails.log.error(error);
       return res.serverError('Something went wrong');
     }
+  },
+
+  "logout": function(req, res) {
+    req.session.destroy(function(err) {
+      if (err) return res.serverError(err);
+      return res.redirect('/');
+    });
   }
 };

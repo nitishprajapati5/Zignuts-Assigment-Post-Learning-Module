@@ -1,0 +1,79 @@
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="/dashboard" class="btn btn-primary">Back</a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <% if(typeof status !=='undefined' && status=="error" ){ %>
+                <div class="alert alert-danger" role="alert">
+                    <%=message %>
+                </div>
+                <% } %>
+                    <% if(typeof status !=='undefined' && status=="success" ){ %>
+                        <div class="alert alert-success" role="alert">
+                            <%=message %>
+                        </div>
+                        <% } %>
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white py-3">
+                    <h2 class="h4 mb-0 text-center">Transfer Funds</h2>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form action="/transfer/create" method="POST">
+                        
+                        <div class="form-group mb-4">
+                            <label for="from" class="form-label font-weight-bold">Source Account</label>
+                            <select name="from" id="from" required class="form-select form-control-lg border-primary">
+                                <option value="" disabled selected>Select an account</option>  
+                                <% currentAccounts.forEach(account => { %>  
+                                    <option value="<%= account.id %>" <%=account.isDefault ? 'selected' : '' %>>
+                                        <%= account.accountName %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="to" class="form-label font-weight-bold">Recipient</label>
+                            <select name="to" id="to" required class="form-select form-control-lg border-primary">
+                                <option value="" disabled selected>Select Friend</option>
+                                <% friends.forEach(friend => { %>
+                                    <option value="<%= friend.id %>"><%= friend.name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="type" class="form-label font-weight-bold">Type</label>
+                            <select name="type" id="type" class="form-select form-control-lg border-primary">
+                                <option value="expense">Expense</option>
+                                <option value="transfer">Transfer</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="amount" class="form-label font-weight-bold">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-primary">Rs.</span>
+                                <input placeholder="0.00" min="1" step="0.01" type="number" name="amount" id="amount" class="form-control form-control-lg border-primary" required>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 pt-2">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                                Confirm Transfer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <p class="text-center text-muted mt-4 small">
+                <i class="fas fa-lock"></i> All transactions are encrypted and secure.
+            </p>
+        </div>
+    </div>
+</div>

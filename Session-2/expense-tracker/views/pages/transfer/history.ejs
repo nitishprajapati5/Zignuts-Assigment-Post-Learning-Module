@@ -1,0 +1,84 @@
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Transaction History</h2>
+   <div class="d-flex gap-2">
+     <a href="/transfer/create" class="btn btn-primary">New Transfer</a>
+    <a href="/dashboard" class="btn btn-outline-primary">Back to Dashboard</a>
+   </div>
+  </div>
+
+
+
+  <% if (typeof status !== 'undefined' && status) { %>
+    <div class="alert alert-<%= status %> alert-dismissible fade show" role="alert">
+      <%= message %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+
+  <% if (!transactions || transactions.length === 0) { %>
+    <div class="card shadow border-0">
+      <div class="card-body text-center py-5">
+        <i class="fa-solid fa-receipt fs-1 text-muted mb-3"></i>
+        <h5 class="text-muted">No Transactions Yet</h5>
+        <p class="text-muted small">Start by creating your first transfer to see it here.</p>
+        <a href="/transfer/create" class="btn btn-outline-primary mt-2">Create First Transfer</a>
+      </div>
+    </div>
+  <% } else { %>    
+    <div class="card shadow border-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-4">Date</th>
+              <th>Description</th>
+              <th>Type</th>
+              <th class="text-end">Amount</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% transactions.forEach(txn => { %>
+              <% 
+                const isCredit = (txn.type === 'Income' || txn.type === 'credit'); 
+                const rowClass = isCredit ? 'table-success-light' : ''; // Optional subtle background
+              %>
+              <tr class="<%= rowClass %>">
+                <td class="ps-4 text-muted small">
+                  <%= new Date(txn.createdAt).toLocaleDateString() %>
+                </td>
+                <td>
+                  <% if (isCredit) { %>
+                    <span class="text-muted small">Received from</span> 
+                    <strong><%= txn.fromUser ? txn.fromUser.name : 'System' %></strong>
+                    <div class="extra-small text-muted">to <%= txn.to.accountName %></div>
+                  <% } else { %>
+                    <span class="text-muted small">Sent to</span> 
+                    <strong><%= txn.toUser ? txn.toUser.name : 'Merchant' %></strong>
+                    <div class="extra-small text-muted">from <%= txn.from.accountName %></div>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="badge rounded-pill <%= isCredit ? 'bg-success text-white' : 'bg-danger text-white' %>" style="font-size: 0.7rem;">
+                    <%= txn.type.toUpperCase() %>
+                  </span>
+                </td>
+                <td class="text-end fw-bold <%= isCredit ? 'text-success' : 'text-danger' %>">
+                  <%= isCredit ? '+' : '-' %>$<%= txn.amount.toLocaleString(undefined, {minimumFractionDigits: 2}) %>
+                </td>
+                <td class="text-center">
+                  <a href="/transfer/delete/<%= txn.id %>" 
+                     class="btn btn-outline-danger btn-sm"
+                     onclick="return confirm('Are you sure you want to delete this transaction?')">
+                    Delete
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+</div>

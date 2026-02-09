@@ -23,6 +23,8 @@ module.exports.routes = {
   'POST /': { action: 'auth/login' },
   'GET /register': {action:'auth/render-register'},
   'POST /register':{action:'auth/register'},
+  'GET /logout':{action:'auth/logout'},
+
   'GET /dashboard':{action:'dashboard/get-all-accounts'}, 
   'GET /account/create':{action:'dashboard/create-account'},
   'POST /account/create':{action:'dashboard/create-account-post'},
@@ -36,6 +38,11 @@ module.exports.routes = {
   'GET /friends/add/:id':{action:'friend/add-friends'},
   'GET /friends/my-friends':{action:'friend/get-my-friends'},
   'GET /friends/remove/:id':{action:'friend/remove-friends'},
+
+  'GET /transfer/create':{action:'transfer/create'},
+  'POST /transfer/create':{action:'transfer/create-post'},
+  'GET /transfer/history':{action:'transfer/history'},
+  'GET /transfer/delete/:id':{action:'transfer/delete-transaction'},
   
 
 

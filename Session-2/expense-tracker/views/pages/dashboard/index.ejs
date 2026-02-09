@@ -4,16 +4,18 @@
             <h1 class="display-5">Welcome back, <%= user.name %>!</h1>
             <p class="text-muted">Here is an overview of your current accounts.</p>
         </div>
+        <div class="col-auto">
+            <a href="/logout" class="btn btn-outline-danger">Logout</a>
+        </div>
     </div>
 
     <div class="d-flex justify-content-between mb-4">
-        <div class="col">   
-            <a href="/account/create" class="btn btn-primary">Create Account</a>
-            <a href="/friends?search=all" class="btn btn-primary">Friends</a>
-            <a href="/friends/my-friends" class="btn btn-primary">Your Friends</a>
-        </div>
-        <div class="col d-flex justify-content-end">
-            <a href="/transfer/create" class="btn btn-primary">Intiate Transfer</a>
+        <div class="col gy-2 px-2">   
+            <a  href="/account/create" class="btn btn-primary m-1">Create Account</a>
+            <a href="/friends?search=all" class="btn btn-primary m-1">All Friends</a>
+            <a href="/friends/my-friends" class="btn btn-primary m-1">Your Friends</a>
+            <a href="/transfer/create" class="btn btn-primary m-1">Intiate Transfer</a>
+            <a href="/transfer/history" class="btn btn-primary m-1">Transfer History</a>
         </div>
     </div>
 
