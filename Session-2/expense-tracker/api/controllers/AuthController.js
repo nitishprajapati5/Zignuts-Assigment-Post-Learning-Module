@@ -13,7 +13,14 @@ module.exports = {
       return res.badRequest('Invalid Email or Password');
     }
 
-    sails.log.info(user);
+    const doesKeyExist = await CacheService.get(`user:${user.id}`);
+    if (doesKeyExist) {
+      return res.redirect('/dashboard');
+    }
+
+    //Redis Input
+    await CacheService.set(`user:${user.id}`,user,60*60*24);
+
     req.session.user = user;
     return res.redirect('/dashboard');
   },

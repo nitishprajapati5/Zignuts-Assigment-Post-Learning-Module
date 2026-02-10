@@ -8,6 +8,8 @@
  * https://sailsjs.com/docs/concepts/policies
  */
 
+const IsLoggedIn = require('../api/policies/IsLoggedIn');
+
 module.exports.policies = {
 
   /***************************************************************************
@@ -18,5 +20,7 @@ module.exports.policies = {
   ***************************************************************************/
 
   // '*': true,
+
+  "*":IsLoggedIn,
 
 };
