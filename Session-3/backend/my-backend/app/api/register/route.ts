@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/app/_firebaseConfig/firebase-admin";
-import { cookies } from "next/headers";
 import { jsonWebTokenGeneration } from "@/app/utils/jsonWebTokenGeneration";
 
 export async function POST(request: NextRequest) {
