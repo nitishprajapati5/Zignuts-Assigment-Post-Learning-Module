@@ -5,31 +5,44 @@ import {
   TextField,
   Typography,
   Button,
-} from "@mui/material";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+} from '@mui/material';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../Utils/axios';
+import { useState } from 'react';
 
 function Login() {
+  const navigate = useNavigate();
 
-  const navigate = useNavigate()
-  
   const {
     handleSubmit,
     register,
     formState: { errors },
   } = useForm();
+  const [isLoading, setLoading] = useState(false);
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     console.log(data);
+
+    await axiosInstance
+      .post(
+        '/api/login',
+        { email: data.email, password: data.password },
+        { withCredentials: true },
+      )
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((err) => console.log(err));
   };
 
   return (
     <Box
       sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
       }}
     >
       <Card sx={{ minWidth: 350, p: 3 }}>
@@ -37,9 +50,9 @@ function Login() {
           <form
             onSubmit={handleSubmit(onSubmit)}
             style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "16px",
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
             }}
           >
             <Typography variant="h5" component="h1">
@@ -56,8 +69,8 @@ function Login() {
                 fullWidth
                 type="text"
                 placeholder="Enter your email"
-                {...register("email", {
-                  required: "Email is required",
+                {...register('email', {
+                  required: 'Email is required',
                 })}
                 error={!!errors.email}
                 helperText={errors.email?.message}
@@ -70,11 +83,11 @@ function Login() {
                 fullWidth
                 type="password"
                 placeholder="Enter your password"
-                {...register("password", {
-                  required: "Password is required",
+                {...register('password', {
+                  required: 'Password is required',
                   minLength: {
                     value: 6,
-                    message: "Minimum 6 characters",
+                    message: 'Minimum 6 characters',
                   },
                 })}
                 error={!!errors.password}
@@ -82,14 +95,24 @@ function Login() {
               />
             </Box>
 
-            <Button type="submit" variant="contained" fullWidth>
-              Login
+            <Button
+              disabled={isLoading}
+              type="submit"
+              variant="contained"
+              fullWidth
+            >
+              {!isLoading ? 'Login' : 'Logging you in!'}
             </Button>
-           
           </form>
-           <Button onClick={() => navigate("/register")} sx={{mt:2}} type="submit" variant="contained" fullWidth>
-              Don't have an Account? Register 
-            </Button>
+          <Button
+            onClick={() => navigate('/register')}
+            sx={{ mt: 2 }}
+            type="submit"
+            variant="contained"
+            fullWidth
+          >
+            Don't have an Account? Register
+          </Button>
         </CardContent>
       </Card>
     </Box>

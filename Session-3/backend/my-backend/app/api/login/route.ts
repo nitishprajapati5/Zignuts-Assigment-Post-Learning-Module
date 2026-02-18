@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/app/_firebaseConfig/firebase-admin";
 import { jsonWebTokenGeneration } from "@/app/utils/jsonWebTokenGeneration";
 
+
+export async function OPTIONS() {
+  return NextResponse.json({}, {
+    headers: {
+      'Access-Control-Allow-Origin': 'http://localhost:3000',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
@@ -32,7 +43,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = NextResponse.json({ id: userDoc.id }, { status: 200 });
+    const response = NextResponse.json({ data : userData }, { status: 200 });
 
     response.cookies.set("auth_token", jsonWebTokenGeneration(userDoc.id), {
       httpOnly: true,
