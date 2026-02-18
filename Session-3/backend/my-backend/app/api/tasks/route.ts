@@ -16,48 +16,38 @@ export async function GET(request: NextRequest) {
   try {
     const authToken = request.cookies.get("auth_token")?.value;
     if (!authToken) {
-      return NextResponse.json(
-        { message: "Unauthorized: Missing auth token" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    let currentUserId: string;
-    try {
-      const decoded = jwt.verify(
-        authToken,
-        process.env.JWT_TOKEN!
-      ) as DecodeToken;
-      currentUserId = decoded.id;
-    } catch (err) {
-      console.error("JWT Verification Error:", err);
-      return NextResponse.json(
-        { message: "Unauthorized: Invalid auth token" },
-        { status: 401 }
-      );
+    const decoded = jwt.verify(authToken, process.env.JWT_TOKEN!) as DecodeToken;
+    const currentUserId = decoded.id;
+
+    const userDoc = await adminDb.collection("users").doc(currentUserId).get();
+    const userData = userDoc.data();
+    const isAdmin = userData?.role === "admin";
+
+    let tasksQuery;
+    if (isAdmin) {
+      tasksQuery = adminDb.collection("tasks");
+    } else {
+      tasksQuery = adminDb.collection("tasks").where("assignedTo", "==", currentUserId);
     }
 
-    const tasksSnapshot = await adminDb
-      .collection("tasks")
-      .where("assignedTo", "==", currentUserId)
-      .get();
-
+    const tasksSnapshot = await tasksQuery.get();
     const assignedTasks = tasksSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    })) as any[];
+    }));
 
     if (assignedTasks.length === 0) {
       return NextResponse.json({ tasksWithOwner: [] }, { status: 200 });
     }
 
-   
     const userIds = Array.from(
-      new Set(assignedTasks.map((task) => task.assignedTo).filter(Boolean))
+      new Set(assignedTasks.map((task: any) => task.assignedTo).filter(Boolean))
     );
 
     let usersMap: Record<string, any> = {};
-    
     if (userIds.length > 0) {
       const batches = [];
       for (let i = 0; i < userIds.length; i += 10) {
@@ -66,39 +56,30 @@ export async function GET(request: NextRequest) {
 
       const snapshots = await Promise.all(
         batches.map((batch) =>
-          adminDb
-            .collection("users")
-            .where(FieldPath.documentId(), "in", batch)
-            .get()
+          adminDb.collection("users").where(FieldPath.documentId(), "in", batch).get()
         )
       );
 
       snapshots.forEach((snap) => {
         snap.docs.forEach((doc) => {
-          usersMap[doc.id] = doc.data();
+          usersMap[doc.id] = { id: doc.id, ...doc.data() };
         });
       });
     }
 
-    const tasksWithAssignedUser = assignedTasks.map((task) => ({
+    const tasksWithAssignedUser = assignedTasks.map((task: any) => ({
       ...task,
-      assignedUserDetails: usersMap[task.assignedTo] || null,
+      assignedUserDetails: usersMap[task.assignedTo] || { email: "Unassigned" },
     }));
 
     return NextResponse.json(
       { tasksWithOwner: tasksWithAssignedUser },
-      { 
-        status: 200, 
-        statusText: "Retrieved Successfully" 
-      }
+      { status: 200 }
     );
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("API_ERROR:", error);
-    return NextResponse.json(
-      { message: "Something went wrong" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: error.message || "Something went wrong" }, { status: 500 });
   }
 }
 export async function POST(request: NextRequest) {
