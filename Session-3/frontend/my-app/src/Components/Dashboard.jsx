@@ -15,13 +15,14 @@ import {
   CircularProgress,
   Alert
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import AddButton from './AddTask';
+import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
   const dispatch = useDispatch();
+  const navigate = useNavigate()
   const { items, status, error } = useSelector((state) => state.tasks);
-  const [taskInput, setTaskInput] = useState("");
 
   useEffect(() => {
     if (status === 'idle') {
@@ -29,39 +30,20 @@ function Dashboard() {
     }
   }, [status, dispatch]);
 
-  // Safely extract tasks array from the nested items object
   const tasksList = items?.tasksWithOwner || [];
 
   return (
     <Container maxWidth="sm" sx={{ mt: 5 }}>
-      {/* Header Section */}
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
         <Typography variant="h4" gutterBottom fontWeight="bold" color="primary">
           Task Manager
         </Typography>
         
-        {/* Input Section */}
-        <Box sx={{ display: 'flex', gap: 1, mb: 4, mt: 2 }}>
-          <TextField
-            fullWidth
-            label="Add a new task"
-            variant="outlined"
-            size="small"
-            value={taskInput}
-            onChange={(e) => setTaskInput(e.target.value)}
-          />
-          <Button 
-            variant="contained" 
-            startIcon={<AddIcon />}
-            sx={{ px: 3 }}
-          >
-            Add
-          </Button>
-        </Box>
+        {/* <AddButton /> */}
+        <Button onClick={() => navigate("/task/create")} type='outline'>Create Task</Button>
 
         <Divider sx={{ mb: 3 }} />
 
-        {/* Status Handling */}
         <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <TaskAltIcon color="action" /> Your Tasks
         </Typography>
@@ -76,7 +58,6 @@ function Dashboard() {
           <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
         )}
 
-        {/* Task List Section */}
         <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
           {status === 'succeeded' && tasksList.length > 0 ? (
             tasksList.map((task) => (
