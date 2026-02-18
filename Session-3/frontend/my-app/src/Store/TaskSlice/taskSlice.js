@@ -15,6 +15,19 @@ export const fetchTask = createAsyncThunk(
   }
 );
 
+export const addTask = createAsyncThunk(
+  "tasks/addTask",
+  async(_,{rejectWithValue}) => {
+   try {
+     const response = await axiosInstance.post("/api/tasks",{},{withCredentials:true});
+      console.log(response)
+      return response.data
+   } catch (error) {
+      return rejectWithValue("Failed to Add Task")
+   }
+  }
+)
+
 const taskSlice = createSlice({
   name: "tasks",
   initialState: { 
@@ -36,7 +49,19 @@ const taskSlice = createSlice({
       .addCase(fetchTask.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
-      });
+      })
+      .addCase(addTask.pending,(state) => {
+        state.status = "loading";
+        state.error = null
+      })
+      .addCase(addTask.fulfilled,(state,action) => {
+        state.status = 'succeeded';
+        state.items.push(action.payload);
+      }).
+      addCase(addTask.rejected,(state,action) => {
+        state.status = "failed"
+        state.error = action.payload
+      })
   }
 });
 
