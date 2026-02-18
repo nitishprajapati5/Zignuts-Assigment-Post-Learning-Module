@@ -78,8 +78,17 @@ export async function PUT(
       updatedAt: new Date().toISOString(),
     });
 
+    const updatedDoc = await taskRef.get()
+
+    const newUpdatedTask = {
+      id:updatedDoc.id,
+      ...updatedDoc.data()
+    }
+
     return NextResponse.json(
-      { message: "Task updated successfully" },
+      { message: "Task updated successfully", 
+        task:newUpdatedTask
+      },
       { status: 200 },
     );
   } catch (error: any) {

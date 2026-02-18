@@ -103,31 +103,19 @@ export async function GET(request: NextRequest) {
 }
 export async function POST(request: NextRequest) {
   try {
-    const { title, description, status, dueDate, assignedTo } =
-      await request.json();
+    const { title, description, status, dueDate, assignedTo } = await request.json();
 
     const authToken = request.cookies.get("auth_token")?.value;
     if (!authToken) {
-      return NextResponse.json(
-        { message: "Unauthorized: Missing auth token" },
-        { status: 401 },
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     let ownerId: string;
     try {
-      const decoded = jwt.verify(
-        authToken,
-        process.env.JWT_TOKEN!,
-      ) as DecodeToken;
-      console.log(decoded.id);
+      const decoded = jwt.verify(authToken, process.env.JWT_TOKEN!) as DecodeToken;
       ownerId = decoded.id;
     } catch (err) {
-      console.log(err);
-      return NextResponse.json(
-        { message: "Unauthorized: Invalid auth token" },
-        { status: 401 },
-      );
+      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
     }
 
     const docRef = await adminDb.collection("tasks").add({
@@ -135,19 +123,27 @@ export async function POST(request: NextRequest) {
       description,
       status,
       dueDate: dueDate,
-      assignedTo: assignedTo === null ? ownerId : assignedTo,
+      ownerId, 
+      assignedTo: assignedTo || ownerId,
       createdAt: FieldValue.serverTimestamp(),
     });
 
+    const docSnap = await docRef.get();
+    
+    const newTask = {
+      id: docSnap.id,
+      ...docSnap.data()
+    };
+
     return NextResponse.json(
       {
-        id: docRef.id,
+        task: newTask,
         message: "Task created Successfully",
       },
       { status: 201 },
     );
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return NextResponse.json(
       { message: "Something went wrong" },
       { status: 500 },
