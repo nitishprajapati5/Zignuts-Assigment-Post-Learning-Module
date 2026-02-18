@@ -10,6 +10,9 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../Utils/axios';
 import { useState } from 'react';
+import {useDispatch,useSelector} from 'react-redux'
+import { setAuth } from '../Store/AuthSlice/authSlice';
+
 
 function Login() {
   const navigate = useNavigate();
@@ -21,6 +24,8 @@ function Login() {
   } = useForm();
   const [isLoading, setLoading] = useState(false);
 
+  const dispatch = useDispatch()
+
   const onSubmit = async (data) => {
     console.log(data);
 
@@ -30,8 +35,10 @@ function Login() {
         { email: data.email, password: data.password },
         { withCredentials: true },
       )
-      .then((data) => {
-        console.log(data);
+      .then((response) => {
+        dispatch(setAuth(response.data))
+        navigate("/dashboard")
+        console.log(response);
       })
       .catch((err) => console.log(err));
   };

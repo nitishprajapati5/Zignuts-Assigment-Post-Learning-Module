@@ -9,6 +9,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setAuth: (state, action) => {
+      console.log("From Slice",action.payload)
       state.auth = action.payload; 
     },
     clearAuth: (state) => {
