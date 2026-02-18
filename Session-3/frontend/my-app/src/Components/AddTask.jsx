@@ -6,19 +6,22 @@ import {
   Typography,
   Button,
   MenuItem,
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../Utils/axios';
 import { useEffect, useState } from 'react';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import { useDispatch, useSelector } from 'react-redux';
+import axiosInstance from '../Utils/axios';
+import { addTask, resetTaskStatus } from '../Store/TaskSlice/taskSlice';
 
 function AddTask() {
-  const navigate = useNavigate();
-  const [isLoading, setLoading] = useState(false);
-  const [users, setUsers] = useState([]); // store fetched users
+  const dispatch = useDispatch();
+  const { status, error } = useSelector((state) => state.tasks);
+  const [users, setUsers] = useState([]);
 
   const { handleSubmit, register, control, formState: { errors }, reset } = useForm({
     defaultValues: {
@@ -30,7 +33,7 @@ function AddTask() {
     },
   });
 
-  // Fetch all users once
+  // Fetch users for the dropdown
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -41,67 +44,45 @@ function AddTask() {
       }
     };
     fetchUsers();
-  }, []); // empty dependency array → fetch once
+  }, []);
 
-  const onSubmit = async (data) => {
-    console.log(data)
+  // Handle Success Side Effects
+  useEffect(() => {
+    if (status === 'succeeded') {
+      reset()
+    }
+  }, [status, reset, dispatch]);
+
+  const onSubmit = (data) => {
     const payload = {
       ...data,
-      dueDate:data.dueDate ? data.dueDate.toDate() : null
-    }
-    console.log(payload)
-    // setLoading(true);
-    // try {
-    //   const payload = {
-    //     ...data,
-    //     dueDate: data.dueDate ? data.dueDate.toDate() : null, // convert Dayjs to JS Date
-    //   };
-
-    //   const response = await axiosInstance.post('/api/tasks', payload, { withCredentials: true });
-    //   console.log('Task created:', response.data);
-
-    //   reset();
-    //   setLoading(false);
-    //   navigate('/dashboard');
-    // } catch (err) {
-    //   console.error(err);
-    //   setLoading(false);
-    // }
+      dueDate: data.dueDate ? data.dueDate.toISOString() : null
+    };
+    dispatch(addTask(payload));
+    
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-      }}
-    >
-      <Card sx={{ minWidth: 400, p: 3 }}>
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#f5f5f5' }}>
+      <Card sx={{ minWidth: 450, p: 2, boxShadow: 3 }}>
         <CardContent>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
-          >
-            <Typography variant="h5" component="h1">
-              Add Task
-            </Typography>
+          <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <Typography variant="h5" fontWeight="bold">Create New Task</Typography>
 
-            {/* Title */}
+            {status === "failed" && (
+              <Alert severity="error">{error || "Task Creation Failed!"}</Alert>
+            )}
+
             <TextField
               label="Title"
-              variant="outlined"
               fullWidth
               {...register('title', { required: 'Task title is required' })}
               error={!!errors.title}
               helperText={errors.title?.message}
             />
 
-            {/* Description */}
             <TextField
               label="Description"
-              variant="outlined"
               fullWidth
               multiline
               rows={3}
@@ -110,19 +91,18 @@ function AddTask() {
               helperText={errors.description?.message}
             />
 
-            {/* Status */}
-            <TextField
-              select
-              label="Status"
-              defaultValue="pending"
-              {...register('status', { required: 'Status is required' })}
-            >
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="in-progress">In Progress</MenuItem>
-              <MenuItem value="completed">Completed</MenuItem>
-            </TextField>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <TextField {...field} select label="Status" fullWidth>
+                  <MenuItem value="pending">Pending</MenuItem>
+                  <MenuItem value="in-progress">In Progress</MenuItem>
+                  <MenuItem value="completed">Completed</MenuItem>
+                </TextField>
+              )}
+            />
 
-            {/* Due Date */}
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <Controller
                 name="dueDate"
@@ -140,37 +120,35 @@ function AddTask() {
                         helperText: errors.dueDate?.message,
                       },
                     }}
-                    onChange={(date) => field.onChange(date)}
                   />
                 )}
               />
             </LocalizationProvider>
 
-            {/* Assigned To Dropdown */}
             <TextField
               select
               label="Assign To"
               fullWidth
-              defaultValue=""
+              defaultValue="" 
               {...register('assignedTo', { required: 'Assigned user is required' })}
               error={!!errors.assignedTo}
               helperText={errors.assignedTo?.message}
             >
               {users.map((user) => (
-                <MenuItem key={user.id} value={user.id}>
+                <MenuItem key={user.id || user._id} value={user.id || user._id}>
                   {user.name || user.email}
                 </MenuItem>
               ))}
             </TextField>
 
-            {/* Submit Button */}
             <Button
               type="submit"
               variant="contained"
-              fullWidth
-              disabled={isLoading}
+              size="large"
+              disabled={status === 'loading'}
+              startIcon={status === 'loading' && <CircularProgress size={20} color="inherit" />}
             >
-              {!isLoading ? 'Create Task' : 'Creating Task...'}
+              {status === 'loading' ? 'Creating...' : 'Create Task'}
             </Button>
           </form>
         </CardContent>
