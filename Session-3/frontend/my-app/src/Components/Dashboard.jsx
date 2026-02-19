@@ -1,20 +1,20 @@
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteTask, fetchTask } from '../Store/TaskSlice/taskSlice';
-import { 
-  Box, 
-  Button, 
-  Typography, 
-  Container, 
-  Card, 
-  CardContent, 
+import {
+  Box,
+  Button,
+  Typography,
+  Container,
+  Card,
+  CardContent,
   CardActions,
   CircularProgress,
   Alert,
   Chip,
   Grid,
   IconButton,
-  Tooltip
+  Tooltip,
 } from '@mui/material';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import AddIcon from '@mui/icons-material/Add';
@@ -26,66 +26,107 @@ import dayjs from 'dayjs';
 import { useLocation } from 'react-router-dom';
 import { Snackbar } from '@mui/material';
 import DashboardCards from './DashboardCards';
+import jsonToCsvExport from 'json-to-csv-export';
 
 function Dashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [alertMsg, setAlertMsg] = useState("");
+  const [alertMsg, setAlertMsg] = useState('Task List Updated Successfully!');
   const { items, status, error } = useSelector((state) => state.tasks);
-  const {auth} = useSelector((state) => state.auth)
-  console.log(auth)
-
+  const { auth } = useSelector((state) => state.auth);
+  const [isCSVLoading, setCSVLoading] = useState(false)
+  console.log(auth);
 
   useEffect(() => {
-    if(location.state?.message){
-      setAlertMsg(location.state.message)
-      setOpenSnackbar(true)
+    if (location.state?.message) {
+      setAlertMsg(location.state.message);
+      setOpenSnackbar(true);
     }
     dispatch(fetchTask());
-  }, [dispatch,location]);
+  }, [dispatch, location]);
 
   const tasksList = items?.tasksWithOwner || [];
+  console.log(tasksList);
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed': return 'success';
-      case 'in-progress': return 'warning';
-      default: return 'default';
+      case 'completed':
+        return 'success';
+      case 'in-progress':
+        return 'warning';
+      default:
+        return 'default';
     }
   };
 
   const handleDelete = (data) => {
-    dispatch(deleteTask(data))
-  }
+    dispatch(deleteTask(data));
+  };
 
   const handleEditChanges = (data) => {
-    navigate(`/edit/${data}`)
-  }
+    navigate(`/edit/${data}`);
+  };
 
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') return;
     setOpenSnackbar(false);
   };
 
+  const handleChangesExport = () => {
+    try {
+      setCSVLoading(true)
+      if (!tasksList || tasksList.length === 0) return;
+
+      const flattedData = tasksList.map((task) => ({
+        Title: task.title || '',
+        Description: task.description || '',
+        Status: task.status || '',
+        'Due Date': task.dueDate ? dayjs(task.dueDate).format('YYYY-MM-DD') : '',
+        'Assigned To': task.assignedUserDetails?.email || '',
+        'Created Date': task.createdAt?._seconds
+          ? dayjs(task.createdAt._seconds * 1000).format('YYYY-MM-DD')
+          : '',
+        'Updated Date': task.updatedAt
+          ? dayjs(task.updatedAt).format('YYYY-MM-DD HH:mm')
+          : '',
+      }));
+
+
+      jsonToCsvExport({ data: flattedData, filename: 'Tasks List' });
+      setCSVLoading(false)
+    } catch (error) {
+      setCSVLoading(false)
+    }
+  };
+
   return (
     <Container maxWidth="md" sx={{ mt: 6, mb: 6 }}>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-
-        <Snackbar 
-        open={openSnackbar} 
-        autoHideDuration={4000} 
-        onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 4,
+        }}
       >
-        <Alert onClose={handleClose} severity="success" variant="filled" sx={{ width: '100%' }}>
-          {alertMsg}
-        </Alert>
-      </Snackbar>
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={4000}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert
+            onClose={handleClose}
+            severity="success"
+            variant="filled"
+            sx={{ width: '100%' }}
+          >
+            {alertMsg}
+          </Alert>
+        </Snackbar>
 
-    
         <Box>
           <Typography variant="h4" fontWeight="800" color="primary.main">
             Dashboard
@@ -94,122 +135,206 @@ function Dashboard() {
             Manage and track your team's progress
           </Typography>
         </Box>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => navigate("/task/create")}
+          onClick={() => navigate('/task/create')}
           sx={{ borderRadius: 2, px: 3, py: 1, boxShadow: 2 }}
         >
           New Task
         </Button>
       </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 2,
+          mb: 2,
+        }}
+      >
+        <Typography variant="h6" sx={{ fontWeight: 500 }}>
+          <Box component="span" sx={{ opacity: 0.7 }}>
+            Hi,{' '}
+          </Box>
+          <Box component="span" sx={{ fontWeight: 700 }}>
+            {auth?.data?.email}
+          </Box>
+        </Typography>
+
+        {auth.data.role === 'admin' && (<Button
+          disabled={isCSVLoading}
+          variant="contained"
+          sx={{
+            textTransform: 'none',
+            borderRadius: 2,
+            px: 3,
+          }}
+          onClick={() => handleChangesExport()}
+        >
+          {isCSVLoading ? "Exporting CSV..." : "Export to CSV / Excel"}
+        </Button>)}
+      </Box>
+
+      {auth.data.role === 'admin' && <DashboardCards />}
 
       {/* Loading State */}
       {status === 'loading' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 10 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            mt: 10,
+          }}
+        >
           <CircularProgress thickness={4} size={50} />
-          <Typography sx={{ mt: 2 }} color="text.secondary">Fetching your tasks...</Typography>
+          <Typography sx={{ mt: 2 }} color="text.secondary">
+            Fetching your tasks...
+          </Typography>
         </Box>
       )}
 
       {/* Error State */}
       {status === 'failed' && (
-        <Alert severity="error" variant="filled" sx={{ mb: 4, borderRadius: 2 }}>
+        <Alert
+          severity="error"
+          variant="filled"
+          sx={{ mb: 4, borderRadius: 2 }}
+        >
           {error}
         </Alert>
       )}
 
-      <Typography sx={{mb:1}} variant="h6">
-        <span style={{ opacity: 0.7 }}>Hi, </span>
-        <strong>{auth.data.email}</strong>
-      </Typography>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 1 }}>
+        <Grid container spacing={8} justifyContent={'center'}>
+          {status === 'succeeded' && tasksList.length > 0
+            ? tasksList.map((task) => (
+              <Grid spacing={3} item xs={12} sm={6} md={4} key={task.id}>
+                <Card
+                  elevation={0}
+                  sx={{
+                    borderRadius: 3,
 
-     
-     {auth.data.role === "admin" && <DashboardCards />}
-
-      <Container maxWidth="lg" sx={{mt:4,mb:1}}>
-        <Grid container spacing={8} justifyContent={"center"}>
-        {status === 'succeeded' && tasksList.length > 0 ? (
-          tasksList.map((task) => (
-            <Grid sx={{display:"flex",alignItems:"center", justifyContent:"center",justifyItems:"center"}} spacing={3} item xs={12} sm={6} md={4} key={task.id}>
-              <Card 
-                elevation={0} 
-                sx={{ 
-                  borderRadius: 3, 
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  transition: '0.3s',
-                  '&:hover': { 
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 12px 24px rgba(0,0,0,0.05)',
-                    borderColor: 'primary.light'
-                  } 
-                }}
-              >
-                <CardContent sx={{ pb: 1 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Chip 
-                      label={task.status || 'pending'} 
-                      size="small" 
-                      color={getStatusColor(task.status)}
-                      sx={{ fontWeight: 'bold', textTransform: 'capitalize' }}
-                    />
-                    <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
-                      <CalendarMonthIcon sx={{ fontSize: 16, mr: 0.5 }} />
-                      <Typography variant="caption">
-                        {task.dueDate ? dayjs(task.dueDate).format('MMM D, YYYY') : 'No date'}
-                      </Typography>
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    transition: '0.3s',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 12px 24px rgba(0,0,0,0.05)',
+                      borderColor: 'primary.light',
+                    },
+                  }}
+                >
+                  <CardContent sx={{ pb: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        mb: 2,
+                      }}
+                    >
+                      <Chip
+                        label={task.status || 'pending'}
+                        size="small"
+                        color={getStatusColor(task.status)}
+                        sx={{
+                          fontWeight: 'bold',
+                          textTransform: 'capitalize',
+                        }}
+                      />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          color: 'text.secondary',
+                        }}
+                      >
+                        <CalendarMonthIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                        <Typography variant="caption">
+                          {task.dueDate
+                            ? dayjs(task.dueDate).format('MMM D, YYYY')
+                            : 'No date'}
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
 
-                  <Typography variant="h6" fontWeight="bold" gutterBottom noWrap>
-                    {task.title}
-                  </Typography>
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary" 
-                    sx={{ 
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      minHeight: '40px'
-                    }}
+                    <Typography
+                      variant="h6"
+                      fontWeight="bold"
+                      gutterBottom
+                      noWrap
+                    >
+                      {task.title}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        minHeight: '40px',
+                      }}
+                    >
+                      {task.description || 'No description provided.'}
+                    </Typography>
+                  </CardContent>
+
+                  <CardActions
+                    sx={{ px: 2, pb: 2, justifyContent: 'space-between' }}
                   >
-                    {task.description || "No description provided."}
-                  </Typography>
-                </CardContent>
-
-                <CardActions sx={{ px: 2, pb: 2, justifyContent: 'space-between' }}>
-                   <Typography variant="caption" color="primary" fontWeight="600">
-                      Assigned to: {task.assignedUserDetails?.email || 'Unassigned'}
-                   </Typography>
-                   <Box>
+                    <Typography
+                      variant="caption"
+                      color="primary"
+                      fontWeight="600"
+                    >
+                      Assigned to:{' '}
+                      {task.assignedUserDetails?.email || 'Unassigned'}
+                    </Typography>
+                    <Box>
                       <Tooltip title="Edit Task">
-                        <IconButton onClick={() => handleEditChanges(task.id)} size="small" color="inherit">
+                        <IconButton
+                          onClick={() => handleEditChanges(task.id)}
+                          size="small"
+                          color="inherit"
+                        >
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete Task">
-                        <IconButton onClick={() => handleDelete(task.id)} size="small" color="error">
+                        <IconButton
+                          onClick={() => handleDelete(task.id)}
+                          size="small"
+                          color="error"
+                        >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                   </Box>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))
-        ) : (
-          status === 'succeeded' && (
-            <Box sx={{ width: '100%', textAlign: 'center', mt: 8, opacity: 0.6 }}>
-              <TaskAltIcon sx={{ fontSize: 60, mb: 2, color: 'divider' }} />
-              <Typography variant="h6">No tasks found</Typography>
-              <Typography variant="body2">Click "New Task" to get started.</Typography>
-            </Box>
-          )
-        )}
-      </Grid>
+                    </Box>
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))
+            : status === 'succeeded' && (
+              <Box
+                sx={{
+                  width: '100%',
+                  textAlign: 'center',
+                  mt: 8,
+                  opacity: 0.6,
+                }}
+              >
+                <TaskAltIcon sx={{ fontSize: 60, mb: 2, color: 'divider' }} />
+                <Typography variant="h6">No tasks found</Typography>
+                <Typography variant="body2">
+                  Click "New Task" to get started.
+                </Typography>
+              </Box>
+            )}
+        </Grid>
       </Container>
     </Container>
   );
