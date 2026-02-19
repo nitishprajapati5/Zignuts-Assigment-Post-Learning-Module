@@ -6,12 +6,11 @@ const serviceAccount = JSON.parse(
   process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT_KEY!
 );
 
-// Check if any apps are already initialized
 const app = getApps().length === 0 
   ? initializeApp({
       credential: cert(serviceAccount),
     })
-  : getApp(); // Reuse the existing [DEFAULT] app
+  : getApp();
 
 export const adminDb = getFirestore(app);
 export const adminAuth = getAuth(app);
