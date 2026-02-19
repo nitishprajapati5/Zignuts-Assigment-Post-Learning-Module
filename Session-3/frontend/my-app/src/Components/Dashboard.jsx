@@ -30,6 +30,15 @@ import dayjs from 'dayjs';
 import DashboardCards from './DashboardCards';
 import jsonToCsvExport from 'json-to-csv-export';
 import SearchComponent from './SearchComponent';
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  documentId,
+  getDocs,
+} from 'firebase/firestore';
+import { db } from '../Utils/firebase';
 
 function Dashboard() {
   const dispatch = useDispatch();
@@ -45,30 +54,110 @@ function Dashboard() {
   const [dateFilter, setDateFilter] = useState('');
   const [page, setPage] = useState(1);
   const ROW_PER_PAGE = 10;
+  const [isLoading,setLoading] = useState(false)
+
+  console.log(auth);
 
   const handlePageChange = (event, value) => {
     setPage(value);
   };
+ useEffect(() => {
+  if (location.state?.message) {
+    setAlertMsg(location.state.message);
+    setOpenSnackbar(true);
+  }
 
-  useEffect(() => {
-    if (location.state?.message) {
-      setAlertMsg(location.state.message);
-      setOpenSnackbar(true);
+  setLoading(true)
+  
+  const taskRef = collection(db, 'tasks');
+  let taskQuery;
+
+  if (auth.data.role === 'admin') {
+    taskQuery = query(taskRef);
+  } else {
+    taskQuery = query(taskRef, where('assignedTo', '==', auth.data.id));
+  }
+
+  const unsubscribe = onSnapshot(taskQuery, async (snapshot) => {
+    try {
+      const tasks = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      if (tasks.length === 0) {
+        setTasksList([]);
+        return;
+      }
+
+      const userIds = Array.from(new Set(tasks.map((t) => t.assignedTo).filter(Boolean)));
+      let usersMap = {};
+
+      if (userIds.length > 0) {
+        const batches = [];
+        for (let i = 0; i < userIds.length; i += 10) batches.push(userIds.slice(i, i + 10));
+
+        const userSnaps = await Promise.all(
+          batches.map((batch) => getDocs(query(collection(db, 'users'), where(documentId(), 'in', batch))))
+        );
+
+        userSnaps.forEach((snap) => {
+          snap.forEach((doc) => { usersMap[doc.id] = { id: doc.id, ...doc.data() }; });
+        });
+      }
+
+      const tasksWithAssignedUser = tasks.map((task) => ({
+        ...task,
+        assignedUserDetails: usersMap[task.assignedTo] || { email: 'Unassigned' },
+      }));
+
+      /* Adding Filter on Changes of date Filter */
+
+      let filtered = tasksWithAssignedUser;
+      if (statusFilter) filtered = filtered.filter(t => t.status === statusFilter);
+      if (dateFilter) filtered = filtered.filter(t => dayjs(t.dueDate).format('YYYY-MM-DD') === dateFilter);
+
+      setTasksList(filtered);
+        setLoading(false)
+
+    } catch (err) {
+      console.error('Error:', err);
+      setLoading(true)
+
     }
-    dispatch(fetchTask());
-    //setTaskList(items?.tasksWithOwner || [])
-  }, [dispatch, location]);
+  }, (error) => {
+        console.error('Permission Error:', error)
+        setLoading(true)
+      });
+
+  return () => unsubscribe();
+  
+}, [auth.data.id, auth.data.role, statusFilter, dateFilter]);
+
+
+
+
+
+
+
 
   //Can I Use 3 useEffect Separation of Concerns?
   //Bit of Concern What Should be Done? --> Doubt
-
-  useEffect(() => {
-    if (items?.tasksWithOwner) {
-      setTasksList(items.tasksWithOwner);
-    }
-  }, [items]);
+ // Ghost Effect Going
+  // useEffect(() => {
+  //   if (items?.tasksWithOwner) {
+  //     setTasksList(items.tasksWithOwner);
+  //   }
+  // }, [items]);
 
   //const tasksList = items?.tasksWithOwner || [];
+
+
+
+
+
+
+
 
   const totalPages = Math.ceil(tasksList.length / ROW_PER_PAGE);
   const paginatedTasks = tasksList.slice(
@@ -123,26 +212,29 @@ function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    let filtered = items?.tasksWithOwner || [];
+  // useEffect(() => {
+  //   let filtered = items?.tasksWithOwner || [];
 
-    if (statusFilter) {
-      filtered = filtered.filter((task) => task.status === statusFilter);
-    }
+  //   if (statusFilter) {
+  //     filtered = filtered.filter((task) => task.status === statusFilter);
+  //   }
 
-    if (dateFilter) {
-      filtered = filtered.filter(
-        (task) =>
-          task.dueDate &&
-          dayjs(task.dueDate).format('YYYY-MM-DD') === dateFilter,
-      );
-    }
+  //   if (dateFilter) {
+  //     filtered = filtered.filter(
+  //       (task) =>
+  //         task.dueDate &&
+  //         dayjs(task.dueDate).format('YYYY-MM-DD') === dateFilter,
+  //     );
+  //   }
 
-    setTasksList(filtered);
-    setPage(1);
-  }, [statusFilter, dateFilter, items]);
+  //   setTasksList(filtered);
+  //   setPage(1);
+  // }, [statusFilter, dateFilter, items]);
 
   return (
+
+    
+
     <Container maxWidth="md" sx={{ mt: 6, mb: 6 }}>
       <Box
         sx={{
@@ -222,7 +314,16 @@ function Dashboard() {
 
       {auth.data.role === 'admin' && <DashboardCards />}
 
-      <Box sx={{ display: 'flex', gap: 2, mr: 2,mt:4, flexWrap: 'wrap',justifyContent:"end" }}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 2,
+          mr: 2,
+          mt: 4,
+          flexWrap: 'wrap',
+          justifyContent: 'end',
+        }}
+      >
         <TextField
           select
           size="small"
@@ -274,16 +375,37 @@ function Dashboard() {
         </Alert>
       )}
 
+      {/* Replace {status === 'loading' && ... } with: */}
+        {isLoading && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              mt: 10,
+            }}
+          >
+            <CircularProgress thickness={4} size={50} />
+            <Typography sx={{ mt: 2 }} color="text.secondary">
+              Updating tasks...
+            </Typography>
+          </Box>
+        )}
+
       <Container maxWidth="lg" sx={{ mt: 4, mb: 1 }}>
-        <Grid container spacing={8} justifyContent={'center'}>
-          {status === 'succeeded' && paginatedTasks.length > 0
+        <Grid container spacing={4} justifyContent={'center'}>
+          {/* {status === 'succeeded' && paginatedTasks.length > 0 */}
+          { paginatedTasks.length > 0
+
             ? paginatedTasks.map((task) => (
-                <Grid spacing={3} item xs={12} sm={6} md={4} key={task.id}>
+                <Grid spacing={8} item xs={12} sm={6} md={4} key={task.id}>
                   <Card
                     elevation={0}
                     sx={{
                       borderRadius: 3,
-                      border: '1px solid',
+                      width: '100%', // Ensure it fills the grid column
+                      //maxWidth: '400px',
+                      //minWidth:'250px', // Prevents card from becoming massive on large screens                      border: '1px solid',
                       borderColor: 'divider',
                       transition: '0.3s',
                       '&:hover': {
@@ -356,6 +478,12 @@ function Dashboard() {
                         variant="caption"
                         color="primary"
                         fontWeight="600"
+                        sx={{
+                          overflow:'hidden',
+                          textOverflow:'ellipsis',
+                          whiteSpace:'nowrap',
+                          maxWidth:'50px'
+                        }}
                       >
                         Assigned to:{' '}
                         {task.assignedUserDetails?.email || 'Unassigned'}
@@ -384,7 +512,7 @@ function Dashboard() {
                   </Card>
                 </Grid>
               ))
-            : status === 'succeeded' && (
+            : (isLoading === false && tasksList.length === 0 && paginatedTasks.length === 0) && (
                 <Box
                   sx={{
                     width: '100%',

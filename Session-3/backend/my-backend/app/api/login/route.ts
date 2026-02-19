@@ -43,7 +43,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = NextResponse.json({ data : userData }, { status: 200 });
+    const result = {
+      id:userDoc.id,
+      ...userData
+    }
+
+    console.log(userData)
+
+    const response = NextResponse.json({ data:result}, { status: 200 });
 
     response.cookies.set("auth_token", jsonWebTokenGeneration(userDoc.id), {
       httpOnly: true,
