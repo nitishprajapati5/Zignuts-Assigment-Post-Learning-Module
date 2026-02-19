@@ -25,6 +25,7 @@ import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { useLocation } from 'react-router-dom';
 import { Snackbar } from '@mui/material';
+import DashboardCards from './DashboardCards';
 
 function Dashboard() {
   const dispatch = useDispatch();
@@ -33,6 +34,9 @@ function Dashboard() {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
   const { items, status, error } = useSelector((state) => state.tasks);
+  const {auth} = useSelector((state) => state.auth)
+  console.log(auth)
+
 
   useEffect(() => {
     if(location.state?.message){
@@ -67,7 +71,7 @@ function Dashboard() {
 
   return (
     <Container maxWidth="md" sx={{ mt: 6, mb: 6 }}>
-      {/* Header Section */}
+
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
 
         <Snackbar 
@@ -81,6 +85,7 @@ function Dashboard() {
         </Alert>
       </Snackbar>
 
+    
         <Box>
           <Typography variant="h4" fontWeight="800" color="primary.main">
             Dashboard
@@ -114,11 +119,19 @@ function Dashboard() {
         </Alert>
       )}
 
-      {/* Task Grid */}
-      <Grid container spacing={3}>
+      <Typography sx={{mb:1}} variant="h6">
+        <span style={{ opacity: 0.7 }}>Hi, </span>
+        <strong>{auth.data.email}</strong>
+      </Typography>
+
+     
+     {auth.data.role === "admin" && <DashboardCards />}
+
+      <Container maxWidth="lg" sx={{mt:4,mb:1}}>
+        <Grid container spacing={8} justifyContent={"center"}>
         {status === 'succeeded' && tasksList.length > 0 ? (
           tasksList.map((task) => (
-            <Grid item xs={12} sm={6} key={task.id || task._id}>
+            <Grid sx={{display:"flex",alignItems:"center", justifyContent:"center",justifyItems:"center"}} spacing={3} item xs={12} sm={6} md={4} key={task.id}>
               <Card 
                 elevation={0} 
                 sx={{ 
@@ -197,6 +210,7 @@ function Dashboard() {
           )
         )}
       </Grid>
+      </Container>
     </Container>
   );
 }

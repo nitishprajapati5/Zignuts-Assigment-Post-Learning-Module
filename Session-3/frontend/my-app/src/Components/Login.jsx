@@ -28,7 +28,7 @@ function Login() {
 
   const onSubmit = async (data) => {
     console.log(data);
-
+    setLoading(true)
     await axiosInstance
       .post(
         '/api/login',
@@ -39,8 +39,9 @@ function Login() {
         dispatch(setAuth(response.data))
         navigate("/dashboard")
         console.log(response);
+        setLoading(false)
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err)).finally(() => setLoading(false));
   };
 
   return (

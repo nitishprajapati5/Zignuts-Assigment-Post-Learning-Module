@@ -8,6 +8,10 @@ import {
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from '../Utils/axios';
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { setAuth } from "../Store/AuthSlice/authSlice";
 
 
 function Register() {
@@ -18,9 +22,25 @@ function Register() {
   } = useForm();
 
   const navigate = useNavigate()
+  const [isLoading,setLoading] = useState(false)
+  const dispatch = useDispatch()
 
-  const onSubmit = (data) => {
+   const onSubmit = async (data) => {
     console.log(data);
+    setLoading(true)
+    await axiosInstance
+      .post(
+        '/api/register',
+        { email: data.email, password: data.password,role:"user"},
+        { withCredentials: true },
+      )
+      .then((response) => {
+        dispatch(setAuth(response.data))
+        navigate("/dashboard")
+        console.log(response);
+        setLoading(false)
+      })
+      .catch((err) =>  setLoading(false)).finally((fl) => setLoading(false) );
   };
 
   return (
@@ -82,11 +102,11 @@ function Register() {
               />
             </Box>
 
-            <Button type="submit" variant="contained" fullWidth>
-              Register
+            <Button disabled={isLoading} type="submit" variant="contained" fullWidth>
+              {!isLoading ? 'Register' : "Registering you in..."}
             </Button>
             <Button onClick={() => navigate("/")} type="submit" variant="contained" fullWidth>
-              Already have an Account? Register 
+              Already have an Account? Login 
             </Button>
           </form>
         </CardContent>

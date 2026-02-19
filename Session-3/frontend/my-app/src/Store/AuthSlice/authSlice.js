@@ -15,6 +15,9 @@ const authSlice = createSlice({
     clearAuth: (state) => {
       state.auth = null;
     },
+    getAuth:(state) => {
+      return state.auth
+    }
   },
 });
 
