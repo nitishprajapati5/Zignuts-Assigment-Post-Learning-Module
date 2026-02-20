@@ -12,6 +12,7 @@ import axiosInstance from '../Utils/axios';
 import { useState } from 'react';
 import {useDispatch,useSelector} from 'react-redux'
 import { setAuth } from '../Store/AuthSlice/authSlice';
+import { toast } from 'react-toastify';
 
 
 function Login() {
@@ -36,12 +37,19 @@ function Login() {
         { withCredentials: true },
       )
       .then((response) => {
+        console.log(response)
         dispatch(setAuth(response.data))
         navigate("/dashboard")
         console.log(response);
         setLoading(false)
       })
-      .catch((err) => console.log(err)).finally(() => setLoading(false));
+      .catch((res) => {
+        console.log("Hi");
+        if(res.status === 401){
+          toast.error("Invalid Email or Password!")
+        }
+        console.log(res.status)
+      }).finally(() => setLoading(false));
   };
 
   return (

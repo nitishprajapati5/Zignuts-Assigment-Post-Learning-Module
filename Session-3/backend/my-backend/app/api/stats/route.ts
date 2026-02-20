@@ -1,12 +1,8 @@
 import { NextRequest,NextResponse } from "next/server";
 import jwt from "jsonwebtoken"
 import { adminDb } from "@/app/_firebaseConfig/firebase-admin";
+import { DecodeToken } from "@/app/utils/jsonWebTokenGeneration";
 
-interface DecodeToken {
-  id: string;
-  iat: number;
-  exp: number;
-}
 
 export async function GET(request:NextRequest){
     try {

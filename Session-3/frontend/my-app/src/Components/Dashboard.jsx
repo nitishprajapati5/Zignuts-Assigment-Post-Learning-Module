@@ -39,6 +39,7 @@ import {
   getDocs,
 } from 'firebase/firestore';
 import { db } from '../Utils/firebase';
+import ViewTaskByUser from './ViewTaskByUser';
 
 function Dashboard() {
   const dispatch = useDispatch();
@@ -301,7 +302,8 @@ function Dashboard() {
         </Typography>
 
         {auth.data.role === 'admin' && (
-          <Button
+          <>
+            <Button
             disabled={isCSVLoading}
             variant="contained"
             sx={{ textTransform: 'none', borderRadius: 2, px: 3 }}
@@ -309,6 +311,8 @@ function Dashboard() {
           >
             {isCSVLoading ? 'Exporting CSV...' : 'Export to CSV / Excel'}
           </Button>
+
+          </>
         )}
       </Box>
 
@@ -324,14 +328,16 @@ function Dashboard() {
           justifyContent: 'end',
         }}
       >
+        <ViewTaskByUser />
         <TextField
           select
           size="small"
           label="Filter by Status"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
+          //slotProps={{ inputLabel: { shrink: true } }}
           sx={{ minWidth: 160 }}
+          placeholder='Filter by Status'
         >
           <MenuItem value="">All</MenuItem>
           <MenuItem value="pending">Pending</MenuItem>

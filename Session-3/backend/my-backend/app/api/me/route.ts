@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken"
-interface DecodeToken {
-  id: string;
-  iat: number;
-  exp: number;
-}
+import { DecodeToken } from "@/app/utils/jsonWebTokenGeneration";
+
 
 
 export async function POST(request:NextRequest){
