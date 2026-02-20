@@ -10,10 +10,6 @@ import SearchComponent from "./SearchComponent"
 import { useTasks } from './hooks/useTasks';
 import TaskFilters from './dashboard/TaskFilters';
 
-
-
-
-
 export default function Dashboard() {
   const location = useLocation();
   const { auth } = useSelector((state) => state.auth);

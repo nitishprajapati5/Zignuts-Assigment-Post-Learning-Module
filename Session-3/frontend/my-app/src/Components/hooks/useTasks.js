@@ -4,7 +4,6 @@ import { collection, query, where, onSnapshot, documentId, getDocs } from 'fireb
 import dayjs from 'dayjs';
 import { db } from '../../Utils/firebase';
 
-
 export function useTasks(statusFilter, dateFilter) {
   const { auth } = useSelector((state) => state.auth);
   const [tasksList, setTasksList] = useState([]);
