@@ -33,7 +33,7 @@ module.exports = {
       required: true,
       //defaultsTo: 0
     },
-    // 🔗 belongs to one user
+    // belongs to one user
     user: {
       model: 'user',
       required: true
